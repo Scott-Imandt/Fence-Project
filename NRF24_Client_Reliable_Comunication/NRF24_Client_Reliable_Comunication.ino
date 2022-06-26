@@ -20,10 +20,14 @@ RHReliableDatagram manager(driver, CLIENT_ADDRESS);
 #define Gate 0 // Gate Number 
 #define inputPin 4 // Pinout of inputPin
 
+int State; // Inital state value to change for PIN READ
+int currentState;
+
 uint8_t data[2]; // [Gate#, State] STATE 0 == close ; 1 == open
+
+// Dont put this on the stack:
 uint8_t buf[RH_NRF24_MAX_MESSAGE_LEN];
 //
-
 
 
 void setup() {
@@ -36,10 +40,8 @@ void setup() {
    Serial.println("Set DataRate: 1Mbps, TP: 0dBm");
   driver.setRF(RH_NRF24::DataRate1Mbps, RH_NRF24::TransmitPower0dBm);
 
-  
-  
-  // Dont put this on the stack:
-  
+  currentState = 0;
+  driver.setModeIdle(); 
    
  //-----------------
 
@@ -48,16 +50,32 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  int State = digitalRead(inputPin);
-
-  if( State != HIGH){
-    Serial.println("Open");
+  boolean temp = GateStatus(); // True == OPEN ; False == Close
+   
+  if(temp & currentState == 0){
+    SendStatusChange(Gate, 1);  
   }
-  delay(500);
- 
-  
+  else if(!temp & currentState == 1){
+    SendStatusChange(Gate, 0);
+  }
+  delay(500);   
 }
+
+
+boolean GateStatus(){
+  State = digitalRead(inputPin);
+
+  if( State == HIGH){
+    Serial.println("Open");
+    return true;
+  }
+  else if(State != HIGH){
+    Serial.println("Close");  
+    return false;
+  } 
+}
+
+
 
 boolean SendStatusChange(int gate, int state){
  
@@ -65,8 +83,11 @@ boolean SendStatusChange(int gate, int state){
   Serial.print(gate);
   Serial.print(": Sending state ");
   Serial.print(state);
-  Serial.print(" to Server");
+  Serial.println(" to Server");
 
+  driver.setModeRx();
+  delay(500);
+  
   //Set data value to send
   data[0] = gate;
   data[1] = state;
@@ -83,13 +104,18 @@ boolean SendStatusChange(int gate, int state){
       Serial.print(from, HEX);
       Serial.print(": ");
       Serial.println((char*)buf);
+      
+      currentState = state;
+      driver.setModeIdle(); 
     }
     else
     {
-      Serial.println("No reply, is nrf24_reliable_datagram_server running?");
+      Serial.println("No reply");
+       driver.setModeIdle(); 
     }
   }
   else
     Serial.println("sendtoWait failed");
+     driver.setModeIdle(); 
   delay(500);
 }
