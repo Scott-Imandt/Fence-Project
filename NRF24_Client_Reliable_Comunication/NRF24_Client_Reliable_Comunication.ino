@@ -4,20 +4,25 @@
 
 // Need to include files for NRF24 and class variables
 
+//Change Gate ID, Channel 
+
 #include <RHReliableDatagram.h>
 #include <RH_NRF24.h>
 #include <SPI.h>
 
 #define CLIENT_ADDRESS 1
+#define CLIENT_ADDRESS3 3
 #define SERVER_ADDRESS 2
 
 // Singleton instance of the radio driver
-RH_NRF24 driver;
+//RH_NRF24 driver;
+
+RH_NRF24 driver(8,7); // ce, csn
 
 // Class to manage message delivery and receipt, using the driver declared above
 RHReliableDatagram manager(driver, CLIENT_ADDRESS);
 
-#define Gate 0 // Gate Number 
+#define Gate 0 // Gate Number // 0,1
 #define inputPin 4 // Pinout of inputPin
 
 int State; // Inital state value to change for PIN READ
@@ -32,25 +37,36 @@ uint8_t buf[RH_NRF24_MAX_MESSAGE_LEN];
 
 void setup() {
   
-    Serial.begin(9600);
-  if (!manager.init())
+    Serial.begin(115200);
+  if (!manager.init()){
     Serial.println("init failed");
   // Defaults after init are 2.402 GHz (channel 2), 2Mbps, 0dBm
-
-   Serial.println("Set DataRate: 1Mbps, TP: 0dBm");
-  driver.setRF(RH_NRF24::DataRate1Mbps, RH_NRF24::TransmitPower0dBm);
-
-  currentState = 0;
-  driver.setModeIdle(); 
+  }
+  else{
+    Serial.println("Set DataRate: 1Mbps, TP: 0dBm");
+    driver.setRF(RH_NRF24::DataRate1Mbps, RH_NRF24::TransmitPower0dBm);
+  }
+  
+   driver.setModeIdle(); 
    
  //-----------------
 
  pinMode(inputPin, INPUT);
- 
+
+ // Inital Gate status check
+ Serial.println("intit Gate Status");
+ Serial.print(GateStatus());
+ if(GateStatus()){
+  SendStatusChange(Gate, 1);
+ }
+ else{
+  SendStatusChange(Gate, 0);
+ }
+
 }
 
 void loop() {
-  boolean temp = GateStatus(); // True == OPEN ; False == Close
+  boolean temp = GateStatus(); // True == CLOSE ; False == OPEN
    
   if(temp & currentState == 0){
     SendStatusChange(Gate, 1);  
@@ -66,11 +82,11 @@ boolean GateStatus(){
   State = digitalRead(inputPin);
 
   if( State == HIGH){
-    Serial.println("Open");
+    Serial.println("Close");
     return true;
   }
   else if(State != HIGH){
-    Serial.println("Close");  
+    Serial.println("Open");  
     return false;
   } 
 }
