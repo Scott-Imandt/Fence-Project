@@ -55,7 +55,7 @@ void setup() {
 
  pinMode(inputPin, INPUT);
 
- // Batery Percent setup
+ // Battery Percent setup
 
  int batteryLevel = batteryPercent();
  Serial.print("init battery Level: ");
@@ -64,7 +64,7 @@ void setup() {
 
  // Inital Gate status check
  Serial.println("intit Gate Status");
- Serial.print(GateStatus());
+ //Serial.print(GateStatus());
  if(GateStatus()){
   SendStatusChange(Gate, 1, batteryLevel);
  }
@@ -110,6 +110,8 @@ boolean SendStatusChange(int gate, int state, int batteryLevel){
   Serial.print(gate);
   Serial.print(": Sending state ");
   Serial.print(state);
+  Serial.print(" Battery Level: ");
+  Serial.print(batteryLevel);
   Serial.println(" to Server");
 
   driver.setModeRx();
@@ -128,7 +130,7 @@ boolean SendStatusChange(int gate, int state, int batteryLevel){
     uint8_t from;   
     if (manager.recvfromAckTimeout(buf, &len, 2000, &from))
     {
-      Serial.print("got reply from : 0x");
+      Serial.print("Got reply from : 0x");
       Serial.print(from, HEX);
       Serial.print(": ");
       Serial.println((char*)buf);

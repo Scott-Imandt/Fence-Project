@@ -45,7 +45,7 @@ void setup(){
    
 }
 
-uint8_t data[] = "Data Deliverd";
+uint8_t data[] = "Data Delivered";
 // Dont put this on the stack:
 uint8_t buf[RH_NRF24_MAX_MESSAGE_LEN];
 
@@ -76,11 +76,11 @@ void NrfLoop(){
     uint8_t from;
     if (manager.recvfromAck(buf, &len, &from))
     {
-      Serial.print("got request from : 0x");
+      Serial.print("Got request from : 0x");
       Serial.print(from, HEX);
       Serial.print(": ");
       Serial.print(buf[0]);     
-      Serial.println(buf[1]);
+      Serial.print(buf[1]);
       Serial.println(buf[2]);
 
       // Send a reply back to the originator client
