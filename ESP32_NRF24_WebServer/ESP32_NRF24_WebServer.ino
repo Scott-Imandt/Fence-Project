@@ -1,21 +1,3 @@
-/*
- WiFi Web Server LED Blink
-
- A simple web server that lets you blink an LED via the web.
- This sketch will print the IP address of your WiFi Shield (once connected)
- to the Serial monitor. From there, you can open that address in a web browser
- to turn on and off the LED on pin 5.
-
- If the IP address of your shield is yourAddress:
- http://yourAddress/H turns the LED on
- http://yourAddress/L turns it off
-
- Circuit:
- * WiFi shield attached
- * LED attached to pin 5
- */
-
-
 #include <WiFi.h>
 #include "arduino_secrets.h"
 
@@ -41,6 +23,9 @@ const char* password = SECRET_PASS;
 int Gate1 = 3;
 int Gate2 = 3;
 
+int Gate1Battery = 0;
+int Gate2Battery = 0;
+
 WiFiServer server(80);
 
 void setup(){
@@ -64,7 +49,6 @@ uint8_t data[] = "Data Deliverd";
 // Dont put this on the stack:
 uint8_t buf[RH_NRF24_MAX_MESSAGE_LEN];
 
-int value = 0;
 
 void loop(){
 
@@ -80,7 +64,7 @@ void NrfSetup(){
     Serial.println("init failed");
   // Defaults after init are 2.402 GHz (channel 2), 2Mbps, 0dBm
 
-  driver.setRF(RH_NRF24::DataRate1Mbps, RH_NRF24::TransmitPower0dBm);
+  driver.setRF(RH_NRF24::DataRate2Mbps, RH_NRF24::TransmitPower0dBm);
 }
 
 void NrfLoop(){
@@ -97,6 +81,7 @@ void NrfLoop(){
       Serial.print(": ");
       Serial.print(buf[0]);     
       Serial.println(buf[1]);
+      Serial.println(buf[2]);
 
       // Send a reply back to the originator client
       if (!manager.sendtoWait(data, sizeof(data), from))
@@ -110,6 +95,7 @@ void NrfLoop(){
             Gate1 = 0;
             digitalWrite(LED1, LOW);
           }
+          Gate1Battery = buf[2];
          }
          
          if(buf[0] == 1){
@@ -120,6 +106,7 @@ void NrfLoop(){
             Gate2 = 0;
             digitalWrite(LED2, LOW);
           }
+         Gate2Battery = buf[2];
          }
        
         // update the webserver with info
@@ -219,7 +206,7 @@ void WebsiteServer(){
 
             String htmlPageFooter =
             "<footer>"
-              "Fence project V 1.0"
+              "Fence project V 1.1"
             "</footer>"
           "</html>";
 
@@ -227,16 +214,18 @@ void WebsiteServer(){
             client.print(htmlPageBody);
 
             client.print("<p>Right Gate:  <strong>");
-            if(Gate1 == 0) client.print("CLOSED");
-            else if(Gate1 == 1) client.print("OPEN");
-            else if(Gate1 == 3) client.print("UNKNOWN");
-            client.print("</strong></p>");
+            if(Gate1 == 0) client.print("CLOSED  ");
+            else if(Gate1 == 1) client.print("OPEN  ");
+            else if(Gate1 == 3) client.print("UNKNOWN  ");
+            client.print(Gate1Battery);
+            client.print("%</strong></p>");
 
             client.print("<p>Left Gate:    <strong>");
-            if(Gate2 == 0) client.print("CLOSED");
-            else if(Gate2 == 1) client.print("OPEN");
-            else if(Gate2 == 3) client.print("UNKNOWN");
-            client.print("</strong></p>");
+            if(Gate2 == 0) client.print("CLOSED  ");
+            else if(Gate2 == 1) client.print("OPEN  ");
+            else if(Gate2 == 3) client.print("UNKNOWN  ");
+            client.print(Gate2Battery);
+            client.print("%</strong></p>");
 
             client.print(htmlPageFooter);
 
