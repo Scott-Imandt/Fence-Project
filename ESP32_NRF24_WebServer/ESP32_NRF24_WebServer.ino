@@ -80,7 +80,7 @@ void NrfSetup(){
     Serial.println("init failed");
   // Defaults after init are 2.402 GHz (channel 2), 2Mbps, 0dBm
 
-  driver.setRF(RH_NRF24::DataRate1Mbps, RH_NRF24::TransmitPower0dBm);
+  driver.setRF(RH_NRF24::DataRate2Mbps, RH_NRF24::TransmitPower0dBm);
 }
 
 void NrfLoop(){

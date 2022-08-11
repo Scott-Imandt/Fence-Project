@@ -43,8 +43,8 @@ void setup() {
   // Defaults after init are 2.402 GHz (channel 2), 2Mbps, 0dBm
   }
   else{
-    Serial.println("Set DataRate: 1Mbps, TP: 0dBm");
-    driver.setRF(RH_NRF24::DataRate1Mbps, RH_NRF24::TransmitPower0dBm);
+    Serial.println("Set DataRate: 2Mbps, TP: 0dBm");
+    driver.setRF(RH_NRF24::DataRate2Mbps, RH_NRF24::TransmitPower0dBm);
   }
   
    driver.setModeIdle(); 
