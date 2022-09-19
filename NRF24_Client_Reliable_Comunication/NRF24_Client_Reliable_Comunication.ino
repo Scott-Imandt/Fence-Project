@@ -22,7 +22,7 @@ RH_NRF24 driver(8,7); // ce, csn
 // Class to manage message delivery and receipt, using the driver declared above
 RHReliableDatagram manager(driver, CLIENT_ADDRESS);
 
-#define Gate 0 // Gate Number // 0,1
+#define Gate 1 // Gate Number // 0 Right , 1 Left
 #define inputPin 4 // Pinout of inputPin
 
 int State; // Inital state value to change for PIN READ
@@ -55,7 +55,6 @@ void setup() {
 
  // Inital Gate status check
  Serial.println("intit Gate Status");
- Serial.print(GateStatus());
  if(GateStatus()){
   SendStatusChange(Gate, 1);
  }
