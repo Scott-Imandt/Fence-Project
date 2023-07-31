@@ -22,7 +22,7 @@ RH_NRF24 driver(8,7); // ce, csn
 // Class to manage message delivery and receipt, using the driver declared above
 RHReliableDatagram manager(driver, CLIENT_ADDRESS);
 
-#define Gate 0 // Gate Number // 0,1
+#define Gate 1 // Gate Number // 0 Right , 1 Left
 #define inputPin 4 // Pinout of inputPin
 
 int State; // Inital state value to change for PIN READ
@@ -45,7 +45,7 @@ void setup() {
   // Defaults after init are 2.402 GHz (channel 2), 2Mbps, 0dBm
   }
   else{
-    Serial.println("Set DataRate: 1Mbps, TP: 0dBm");
+    Serial.println("Set DataRate: 2Mbps, TP: 0dBm");
     driver.setRF(RH_NRF24::DataRate2Mbps, RH_NRF24::TransmitPower0dBm);
   }
   
@@ -153,9 +153,9 @@ boolean SendStatusChange(int gate, int state, int batteryLevel){
 int batteryPercent(){
 
   int sensorValue = analogRead(A6);
-  int percentRaw = map(sensorValue, 754, 988, 0, 100);
+  int percentRaw = map(sensorValue, 650, 980, 0, 100);
   int percentConstrain = constrain(percentRaw,0,100);
-
+  //Serial.println(sensorValue);
   return percentConstrain; 
 }
 
